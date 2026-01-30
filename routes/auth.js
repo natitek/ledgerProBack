@@ -90,4 +90,11 @@ router.get('/verify', (req, res) => {
   }
 });
 
+router.post('/sync', (req,res)=>{
+  console.log(req.json());
+  res.json({ status: 'inside Sync', timestamp: new Date() });
+});
+  
+
+
 export default router;
