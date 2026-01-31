@@ -38,10 +38,10 @@ app.use(cors({
   allowedHeaders: [
     "Content-Type",
     "Authorization",
-    "x-auth-token" // <-- add your custom header here
+    "x-auth-token" 
   ]
 }));
-// app.options("*", cors());
+app.options("*", cors());
 
 app.use(json());
 

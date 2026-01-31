@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    googleId: {
+       type: String}
+        ,
+
     apiKey: {
         type: String,
         unique: true

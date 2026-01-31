@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
 
@@ -201,6 +202,67 @@ router.get('/apikey', async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 })
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+router.post("/signin/google", async (req, res) => {
+  const { token } = req.body; // Google ID token from frontend
+
+  try {
+    // 1. Verify Google token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, sub } = payload;
+
+    // 2. Find or create user
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        googleId: sub,
+        password: null, // no password for Google users
+      });
+      await user.save();
+    }
+
+    // 3. Create your JWT (same as normal signin)
+    const jwtPayload = {
+      user: { id: user.id },
+    };
+
+    jwt.sign(
+      jwtPayload,
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "5h" },
+      (err, jwtToken) => {
+        if (err) throw err;
+
+        res.json({
+          status: "success",
+          message: "Google login successful!",
+          token: jwtToken,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          },
+        });
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({
+      status: "error",
+      message: "Invalid Google token",
+    });
+  }
+});
 
 
 export default router;
