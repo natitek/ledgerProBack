@@ -159,6 +159,13 @@ async function verifyApiKey(req, res, next) {
 }
 async function addTransaction(req,res,next){
 
+try{
+  console.log(req,res);
+  next();
+}
+catch(err){
+  console.error("unable to register transaction", err)
+}
 
 }
 
@@ -188,7 +195,7 @@ router.get('/apikey', async (req, res) => {
     }
 
    res.status(200).json({ apiKey: user.apiKey }); 
-   
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
