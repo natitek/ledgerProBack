@@ -89,6 +89,37 @@ router.post('/signin', async (req, res) => {
   }
 });
 
+
+function authMiddleware(req, res, next) {
+  // Expect: Authorization: Bearer <token>
+  if (req.method === "OPTIONS") return next(); 
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ error: "No authorization header" });
+  }
+
+  const parts = authHeader.split(" ");
+  if (parts.length !== 2 || parts[0] !== "Bearer") {
+    return res.status(401).json({ error: "Invalid authorization format" });
+  }
+
+  const token = parts[1];
+
+  jwt.verify(token, process.env.JWT_SECRET || "secret", (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    // decoded === payload you signed
+    req.user = decoded;
+    next();
+  });
+}
+
+
+
 // Verify Token (Optional utility route)
 router.get('/verify', (req, res) => {
   const token = req.header('x-auth-token');
@@ -128,6 +159,7 @@ async function verifyApiKey(req, res, next) {
 }
 async function addTransaction(req,res,next){
 
+
 }
 
 router.post('/sync', verifyApiKey,addTransaction,(req,res)=>{
@@ -136,22 +168,34 @@ router.post('/sync', verifyApiKey,addTransaction,(req,res)=>{
   res.json({ status: 'inside Sync', timestamp: new Date() });
 });
 
-router.get("/apikey", verifyApiKey, async (req, res) => {
+router.get('/apikey', async (req, res, next) => {
+ 
+  if (req.method === "OPTIONS") return next();
   try {
-    const user = await User.findById(req.user.id).select("apiKey");
+    // console.log("epstien pls")
+
+    const userId = req.query.userId; // frontend must send ?userId=xxxx
+
+    if (!userId) {
+      return res.status(401).json({ error: "User not logged in" });
+    }
+
+    const user = await User.findById(userId).select("apiKey");
+    console.log(user)
 
     if (!user || !user.apiKey) {
       return res.status(404).json({ error: "API key not found" });
     }
 
-    res.json({
-      apiKey: user.apiKey
-    });
+    res.send(user.apiKey); // just sen
+    // Return API key
+    // res.status(200).json({ apiKey: user.apiKey });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
-});
+})
 
 
 export default router;

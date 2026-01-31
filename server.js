@@ -19,7 +19,7 @@ const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/Ledgerpro';
     await mongoose.connect(mongoURI);
-    console.log('MongoDB Connected...');
+    console.log(`${new Date()} MongoDB Connected...`);
   } catch (err) {
     console.error(err.message);
     process.exit(1);
@@ -32,11 +32,15 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
-  credentials: true
+  origin: ['http://localhost:5173', 'http://localhost:5174' , 'https://journee-striped-chase.ngrok-free.dev'],
+  credentials: true,
+   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+app.options("*", cors());
 
 app.use(json());
+
 
 
 //Routes
