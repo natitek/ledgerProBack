@@ -170,7 +170,7 @@ router.post('/sync', verifyApiKey,addTransaction,(req,res)=>{
 
 router.get('/apikey', async (req, res, next) => {
  
-  if (req.method === "OPTIONS") return next();
+  // if (req.method === "OPTIONS") return next();
   try {
     // console.log("epstien pls")
 
