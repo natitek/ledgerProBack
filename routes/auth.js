@@ -16,10 +16,18 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'User already exists' });
     }
 
+//Generate an API key for every new User (Natitek)
+    
+    function generateApiKey() {
+  return crypto.randomBytes(32).toString("hex");}
+
+  const newApiKey = generateApiKey();
+
     user = new User({
       name,
       email,
-      password
+      password,
+      newApiKey
     });
 
     const salt = await bcrypt.genSalt(10);
@@ -28,6 +36,10 @@ router.post('/signup', async (req, res) => {
     await user.save();
 
     res.status(201).json({ status: 'success', message: 'Account Created! Please Sign In.' });
+
+    
+
+
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ status: 'error', message: 'Server error' });
@@ -90,8 +102,25 @@ router.get('/verify', (req, res) => {
   }
 });
 
-router.post('/sync', (req,res)=>{
-  console.log(req.json());
+// verify UserIssuedApiKey
+async function verifyApiKey(req, res, next) {
+  const apiKey = req.headers["x-api-key"];
+
+  if (!apiKey) {
+    return res.status(401).json({ error: "API key missing" });
+  }
+  const user = await User.findOne({ apiKey });
+
+  if (apiKey !== user.apiKey) {
+    return res.status(403).json({ error: "Invalid API key" });
+  }
+
+  next();
+}
+
+router.post('/sync', verifyApiKey,(req,res)=>{
+  console.log(req);
+  
   res.json({ status: 'inside Sync', timestamp: new Date() });
 });
   

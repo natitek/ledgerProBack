@@ -17,6 +17,10 @@ const UserSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now
+    },
+    apiKey: {
+        type: String,
+        unique: true
     }
 });
 
