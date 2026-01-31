@@ -187,10 +187,8 @@ router.get('/apikey', async (req, res) => {
       return res.status(404).json({ error: "API key not found" });
     }
 
-    res.send(user.apiKey); // just sen
-    // Return API key
-    // res.status(200).json({ apiKey: user.apiKey });
-
+   res.status(200).json({ apiKey: user.apiKey }); 
+   
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
