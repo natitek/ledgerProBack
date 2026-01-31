@@ -136,7 +136,7 @@ router.post('/sync', verifyApiKey,addTransaction,(req,res)=>{
   res.json({ status: 'inside Sync', timestamp: new Date() });
 });
 
-router.get("/api/apikey", verifyApiKey, async (req, res) => {
+router.get("/apikey", verifyApiKey, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("apiKey");
 
