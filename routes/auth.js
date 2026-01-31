@@ -126,13 +126,32 @@ async function verifyApiKey(req, res, next) {
     res.status(500).json({ error: "Server error" });
   }
 }
+async function addTransaction(req,res,next){
 
-router.post('/sync', verifyApiKey,(req,res)=>{
+}
+
+router.post('/sync', verifyApiKey,addTransaction,(req,res)=>{
   console.log(req);
   
   res.json({ status: 'inside Sync', timestamp: new Date() });
 });
-  
+
+router.get("/api/apikey", verifyApiKey, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("apiKey");
+
+    if (!user || !user.apiKey) {
+      return res.status(404).json({ error: "API key not found" });
+    }
+
+    res.json({
+      apiKey: user.apiKey
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 
 export default router;
