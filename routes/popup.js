@@ -64,6 +64,7 @@ router.post('/add-account', auth, async (req, res) => {
     });
 
     await newAccount.save();
+  
 
     res.status(200).json({
       status: 'Success',

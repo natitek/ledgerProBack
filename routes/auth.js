@@ -104,18 +104,27 @@ router.get('/verify', (req, res) => {
 
 // verify UserIssuedApiKey
 async function verifyApiKey(req, res, next) {
-  const apiKey = req.headers["x-api-key"];
+  try {
+    const apiKey = req.headers["x-api-key"];
 
-  if (!apiKey) {
-    return res.status(401).json({ error: "API key missing" });
+    if (!apiKey) {
+      return res.status(401).json({ error: "API key missing" });
+    }
+
+    const user = await User.findOne({ apiKey });
+
+    if (!user) {
+      return res.status(403).json({ error: "Invalid API key" });
+    }
+
+    // attach user for later use
+    req.user = user;
+
+    next();
+  } catch (err) {
+    console.error("API key verification failed:", err);
+    res.status(500).json({ error: "Server error" });
   }
-  const user = await User.findOne({ apiKey });
-
-  if (apiKey !== user.apiKey) {
-    return res.status(403).json({ error: "Invalid API key" });
-  }
-
-  next();
 }
 
 router.post('/sync', verifyApiKey,(req,res)=>{
